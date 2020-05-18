@@ -15,7 +15,7 @@
 --
 -- | @since 1.0.0.0
 
-module Generic (Relational, Generic, reifyColumns) where
+module Table.Generic (Relational, GRelation, Generic, reifyColumns) where
 
 import Control.Applicative
 import Control.Carrier.State.Strict
@@ -27,8 +27,16 @@ import Data.Text
 import Data.Typeable
 import GHC.Generics
 
-import Types
 import Table.Types
+
+-- Carrying indicies for alternative column names.
+data Cxt = Cxt
+  { _idx  :: Int
+  , _name :: Maybe Text
+  }
+
+makeLenses ''Cxt
+
 
 -- | 'reifyColumns' generates column names and types given a record pass as a
 -- | type level kind via the proxy. The state computation admits an index for
@@ -39,8 +47,8 @@ import Table.Types
 -- | amount of unnamed datatype selectors.
 --
 -- | @since 1.0.0.0
-reifyColumns :: forall a. (Relational a) => Proxy a -> [ ColInfo ]
-reifyColumns _ = join $ evalState cxt (gTblCols @(Rep a))
+reifyColumns :: forall rep. (Relational rep) => Proxy rep -> [ ColInfo ]
+reifyColumns _ = join $ evalState cxt (gTblCols $ Proxy @(Rep rep))
   where cxt = Cxt 0 Nothing
 
 -- | The kind of constraint we impose on data types we'll be able to build a
@@ -54,23 +62,24 @@ type Relational a =
 
 -- | @since 1.0.0.0
 class GRelation rep where
-  gTblCols :: forall rep sig m. Has (State Cxt) sig m => m [ ColInfo ]
+  gTblCols :: forall sig m. Has (State Cxt) sig m
+           => Proxy rep -> m [ ColInfo ]
 
 instance GRelation a => GRelation (C1 c a) where
-  gTblCols = gTblCols @a
+  gTblCols _ = gTblCols (Proxy @a)
 
 instance GRelation a => GRelation (D1 c a) where
-  gTblCols = gTblCols @a
+  gTblCols _ = gTblCols (Proxy :: Proxy a)
 
 instance (Selector c, GRelation a) => GRelation (S1 c a) where
-  gTblCols = do
+  gTblCols _ = do
     name .= case pack (selName (undefined :: S1 c a b)) of
       "" -> Nothing
       n  -> Just n
-    gTblCols @a
+    gTblCols (Proxy @a)
 
 instance Typeable a => GRelation (K1 i a) where
-  gTblCols = do
+  gTblCols _ = do
     st  <- get @ Cxt
     idx += 1
     return $ pure ColInfo
@@ -85,11 +94,7 @@ instance Typeable a => GRelation (K1 i a) where
           proxyTyCon = typeRepTyCon . typeRep $ Proxy @a
 
 instance (GRelation a, GRelation b) => GRelation (a :*: b) where
-  gTblCols = liftA2 (++) (gTblCols @a) (gTblCols @b)
-
-data Cxt = Cxt
-  { _idx  :: Int
-  , _name :: Maybe Text
-  }
-
-makeLenses ''Cxt
+  gTblCols _ =
+    let as = gTblCols (Proxy :: Proxy a)
+        bs = gTblCols (Proxy :: Proxy b)
+    in liftA2 (++) as bs
