@@ -1,0 +1,45 @@
+cabal-version: >=2.0
+
+name:         algebraic-query
+version:      0.1.0.0
+synopsis:     SQL specific language built on top of fused-effects
+-- bug-reports:
+license:      BSD-3-Clause
+license-file: LICENSE
+author:       riz0id
+maintainer:   jacob@z-tech.org
+copyright:    Copyright (C) 2012-2016 Edward A. Kmett
+category:     Control, Database, SQL
+build-type:   Simple
+
+extra-source-files:
+  LICENSES
+  CHANGELOG.md
+
+description:
+  SQL specific language built on top of fused-effects.
+
+tested-with:
+  GHC == 8.8.3
+
+executable Labels
+  main-is:          Main.hs
+  hs-source-dirs:   src
+  default-language: Haskell2010
+
+  other-modules:
+      FieldSelectors
+    , Selectors
+    , Table
+    , Table.Generic
+    , Table.Types
+    , Types
+
+  build-depends:
+      base          >= 4.9 && < 4.15
+    , fused-effects
+    , fused-effects-lens
+    , microlens
+    , microlens-th
+    , mtl
+    , text
