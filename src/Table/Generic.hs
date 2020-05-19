@@ -15,7 +15,7 @@
 --
 -- | @since 1.0.0.0
 
-module Table.Generic (Relational, GRelation, Generic, reifyColumns) where
+module Table.Generic (Relational, GRelation(..), Generic, reifyColumns) where
 
 import Control.Applicative
 import Control.Carrier.State.Strict
@@ -36,7 +36,6 @@ data Cxt = Cxt
   }
 
 makeLenses ''Cxt
-
 
 -- | 'reifyColumns' generates column names and types given a record pass as a
 -- | type level kind via the proxy. The state computation admits an index for

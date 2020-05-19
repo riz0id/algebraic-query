@@ -38,15 +38,18 @@ common common
   if (impl(ghc >= 8.8))
     ghc-options: -Wno-missing-deriving-strategies
 
-executable Labels
+library
   import:         common
   main-is:        Main.hs
   hs-source-dirs: src
 
+  exposed-modules:
+      Table
+    , FieldSelectors
+
   other-modules:
     --  FieldSelectors
       Selectors
-    , Table
     , Table.Generic
     , Table.Types
     , Types
@@ -61,10 +64,14 @@ executable Labels
     , text
 
 test-suite test
-  import:  common
-  type:    exitcode-stdio-1.0
-  main-is: README.lhs
+  import:         common
+  type:           exitcode-stdio-1.0
+  hs-source-dirs: test
+  main-is:        Test.hs
 
   build-depends:
     , base
     , fused-effects
+    , text
+
+    , algebraic-query
