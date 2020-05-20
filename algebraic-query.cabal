@@ -54,7 +54,8 @@ library
     , unordered-containers
     , fused-effects
     , fused-effects-lens
-    , lens
+    , microlens
+    , microlens-th
     , text
 
 test-suite test
@@ -68,5 +69,4 @@ test-suite test
     , base
     , fused-effects
     , generic-lens
-    , lens
     , text

@@ -16,32 +16,39 @@
 --
 -- | @since 1.0.0.0
 
-module Column (Column(..), Relational, reifyColumns) where
+module Column
+  ( Column(..), name, attributes
+  , Relational, reifyColumns
+  ) where
 
 import Control.Applicative
 import Control.Carrier.State.Strict
 import Control.Effect.Lens
 import Control.Monad
-import Control.Lens (makeLenses, (^.))
 import Data.Text
 import Data.Typeable
 import GHC.Generics
+import Lens.Micro
+import Lens.Micro.TH
 
 -- | Friend Modules
 import Attribute
 
 data Column = Column
-  { columnName       :: Text
-  , columnAttributes :: [ Attribute ]
+  { _name       :: Text
+  , _attributes :: [ Attribute ]
   } deriving Show
+
 
 -- Carrying indicies for alternative column names.
 data Cxt = Cxt
-  { _idx  :: Int
-  , _name :: Maybe Text
+  { _idx     :: Int
+  , _cxtName :: Maybe Text
   }
 
 makeLenses ''Cxt
+makeLenses ''Column
+
 
 reifyColumns :: ∀ x. Relational x => Proxy x -> [ Column ]
 reifyColumns _ = join $ evalState cxt (gTblCols $ Proxy @(Rep x))
@@ -69,7 +76,7 @@ instance GRelation a => GRelation (D1 c a) where
 
 instance (Selector c, GRelation a) => GRelation (S1 c a) where
   gTblCols _ = do
-    name .= case pack (selName (undefined :: S1 c a b)) of
+    cxtName .= case pack (selName (undefined :: S1 c a b)) of
       "" -> Nothing
       n  -> Just n
     gTblCols (Proxy @a)
@@ -79,10 +86,10 @@ instance Typeable a => GRelation (K1 i a) where
     st  <- get @ Cxt
     idx += 1
     return $ pure Column
-      { columnName  = case st^.name of
+      { _name  = case st^.cxtName of
           Just name' -> name'
           Nothing    -> "col_" <> pack (show $ st^.idx)
-      , columnAttributes = if proxyTyCon == maybeTyCon
+      , _attributes = if proxyTyCon == maybeTyCon
         then [ Optional ]
         else [ Required ]
       }

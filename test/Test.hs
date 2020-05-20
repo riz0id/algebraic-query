@@ -18,7 +18,8 @@ data Person = Person
 
 personTable :: Table Person
 personTable = table "PersonDB"
-  [ #age :- Primary
+  [ #age  :- Primary
+  , #name :- Primary
   ]
 
 main :: IO ()
