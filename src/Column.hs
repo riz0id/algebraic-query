@@ -11,13 +11,27 @@
 {-# LANGUAGE UnicodeSyntax       #-}
 
 -- | The 'GRelation' class provides generic instances reifying a witness of a
--- | record type into a list of that record's selector names as well as the SQL
--- | compatible type for that  selector type annotation.
+-- record type into a list of that record's selector names as well as the SQL
+-- compatible type for that  selector type annotation.
 --
--- | @since 1.0.0.0
+-- @since 1.0.0.0
 
 module Column
-  ( Column(..), name, attributes
+  ( -- * SQL Columns
+    Column(..)
+    -- ** 'Column' lenses
+
+    -- | Lense focusing on the name of a 'Column'.
+    --
+    -- @since 1.0.0.0
+  , name
+
+    -- | Lense focusing on the attributes of a 'Column'.'
+    --
+    -- @since 1.0.0.0
+  , attributes
+
+    -- * Column generation
   , Relational, reifyColumns
   ) where
 
@@ -31,14 +45,21 @@ import GHC.Generics
 import Lens.Micro
 import Lens.Micro.TH
 
--- | Friend Modules
 import Column.Attribute
 
+-- | 'Column' attributes should not be accessed directly, instead you should use
+-- the lenses provided for it.
+--
+-- FIXME NOTE: Still unclear if access to 'Column' fields here should be granted
+-- to the users
+--
+-- @since 1.0.0.0
 data Column = Column
-  { _name       :: Text
-  , _attributes :: [ Attribute ]
+  { _name       :: Text          -- ^ The name of the 'Column'
+  , _attributes :: [ Attribute ] -- ^ SQL attributes attached to this 'Column'
   } deriving Show
 
+makeLenses ''Column
 
 -- Carrying indicies for alternative column names.
 data Cxt = Cxt
@@ -47,19 +68,19 @@ data Cxt = Cxt
   }
 
 makeLenses ''Cxt
-makeLenses ''Column
+
 
 -- | Reifies all of record @x@'s fields into columns with the same names.
 --
--- | @since 1.0.0.0
+-- @since 1.0.0.0
 reifyColumns :: ∀ x. Relational x => Proxy x -> [ Column ]
 reifyColumns _ = join $ evalState cxt (gTblCols $ Proxy @(Rep x))
   where cxt = Cxt 0 Nothing
 
 -- | The kind of constraint we impose on data types we'll be able to build a
--- | database out of
+-- database out of.
 --
--- | @since 1.0.0.0
+-- @since 1.0.0.0
 type Relational a =
   ( Generic a
   , GRelation (Rep a)

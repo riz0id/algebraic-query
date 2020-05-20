@@ -48,10 +48,15 @@ library
     , Column.Attribute
     , Control.Carrier.Query
     , Control.Effect.Query
-    , SqlSelector
+    , Control.Effect.Query.Labelled
+    , Selector
     , SQL
     , SQL.Exp
     , Table
+
+  other-modules:
+      Control.Effect.Query.Internal
+    , SQL.Exp.AST
 
   build-depends:
       base          >= 4.9 && < 4.15

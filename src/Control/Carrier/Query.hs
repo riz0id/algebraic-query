@@ -7,12 +7,14 @@
 -- | @since 1.0.0.0
 
 module Control.Carrier.Query
-  ( module Control.Effect.Query
+  ( runQuery
+
+    -- * Re-exports
+  , module Control.Effect.Query
   ) where
 
 import Control.Algebra
 
--- | Friend modules
 import Control.Effect.Query
 import SQL
 

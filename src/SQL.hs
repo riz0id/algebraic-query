@@ -4,16 +4,18 @@
 
 -- | @since 1.0.0.0
 
-module SQL (SQL, sources, columns, restricts) where
+module SQL (SQL, source, columns, restricts) where
 
 import Lens.Micro.TH
 
--- | Friend modules
 import SQL.Exp
 import Table
 
+-- | The internal state held by a 'Query' context.
+--
+-- @since 1.0.0.02
 data SQL tbl = SQL
-  { _sources   :: Table tbl
+  { _source    :: Table tbl
   , _columns   :: ∀ a. [Exp tbl a]
   , _restricts :: ![Exp tbl Bool]
   }
