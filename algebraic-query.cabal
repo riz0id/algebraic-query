@@ -44,23 +44,17 @@ library
   hs-source-dirs: src
 
   exposed-modules:
-      Table
-    , FieldSelectors
-
-  other-modules:
-    --  FieldSelectors
-      Selectors
-    , Table.Generic
-    , Table.Types
-    , Types
+      Attribute
+    , Column
+    , SqlSelector
+    , Table
 
   build-depends:
       base          >= 4.9 && < 4.15
+    , unordered-containers
     , fused-effects
     , fused-effects-lens
-    , microlens
-    , microlens-th
-    , mtl
+    , lens
     , text
 
 test-suite test
@@ -70,8 +64,9 @@ test-suite test
   main-is:        Test.hs
 
   build-depends:
+    , algebraic-query
     , base
     , fused-effects
+    , generic-lens
+    , lens
     , text
-
-    , algebraic-query

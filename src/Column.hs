@@ -8,6 +8,7 @@
 {-# LANGUAGE TemplateHaskell     #-}
 {-# LANGUAGE TypeApplications    #-}
 {-# LANGUAGE TypeOperators       #-}
+{-# LANGUAGE UnicodeSyntax       #-}
 
 -- | The 'GRelation' class provides generic instances reifying a witness of a
 -- | record type into a list of that record's selector names as well as the SQL
@@ -15,19 +16,24 @@
 --
 -- | @since 1.0.0.0
 
-module Table.Generic (Relational, GRelation(..), Generic, reifyColumns) where
+module Column (Column(..), Relational, reifyColumns) where
 
 import Control.Applicative
 import Control.Carrier.State.Strict
 import Control.Effect.Lens
 import Control.Monad
-import Lens.Micro
-import Lens.Micro.TH
+import Control.Lens (makeLenses, (^.))
 import Data.Text
 import Data.Typeable
 import GHC.Generics
 
-import Table.Types
+-- | Friend Modules
+import Attribute
+
+data Column = Column
+  { columnName       :: Text
+  , columnAttributes :: [ Attribute ]
+  } deriving Show
 
 -- Carrying indicies for alternative column names.
 data Cxt = Cxt
@@ -37,20 +43,11 @@ data Cxt = Cxt
 
 makeLenses ''Cxt
 
--- | 'reifyColumns' generates column names and types given a record pass as a
--- | type level kind via the proxy. The state computation admits an index for
--- | column names to fall back on in the cases that a record is not provided.
---
--- | In the case we find a datatype with unnamed fields (such as the example
--- | below) we the columns will be named col_1, col_2, ..., col_n where n is the
--- | amount of unnamed datatype selectors.
---
--- | @since 1.0.0.0
-reifyColumns :: forall rep. (Relational rep) => Proxy rep -> [ ColInfo ]
-reifyColumns _ = join $ evalState cxt (gTblCols $ Proxy @(Rep rep))
+reifyColumns :: ∀ x. Relational x => Proxy x -> [ Column ]
+reifyColumns _ = join $ evalState cxt (gTblCols $ Proxy @(Rep x))
   where cxt = Cxt 0 Nothing
 
--- | The kind of constraint we impose on data types we'll be able to build a
+  -- | The kind of constraint we impose on data types we'll be able to build a
 -- | database out of
 --
 -- | @since 1.0.0.0
@@ -62,7 +59,7 @@ type Relational a =
 -- | @since 1.0.0.0
 class GRelation rep where
   gTblCols :: forall sig m. Has (State Cxt) sig m
-           => Proxy rep -> m [ ColInfo ]
+           => Proxy rep -> m [ Column ]
 
 instance GRelation a => GRelation (C1 c a) where
   gTblCols _ = gTblCols (Proxy @a)
@@ -81,11 +78,11 @@ instance Typeable a => GRelation (K1 i a) where
   gTblCols _ = do
     st  <- get @ Cxt
     idx += 1
-    return $ pure ColInfo
-      { colName  = case st^.name of
+    return $ pure Column
+      { columnName  = case st^.name of
           Just name' -> name'
           Nothing    -> "col_" <> pack (show $ st^.idx)
-      , colAttrs = if proxyTyCon == maybeTyCon
+      , columnAttributes = if proxyTyCon == maybeTyCon
         then [ Optional ]
         else [ Required ]
       }
