@@ -44,9 +44,13 @@ library
   hs-source-dirs: src
 
   exposed-modules:
-      Attribute
-    , Column
+      Column
+    , Column.Attribute
+    , Control.Carrier.Query
+    , Control.Effect.Query
     , SqlSelector
+    , SQL
+    , SQL.Exp
     , Table
 
   build-depends:

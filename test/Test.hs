@@ -3,12 +3,14 @@
 {-# LANGUAGE OverloadedLabels  #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TypeApplications  #-}
-{-# LANGUAGE TemplateHaskell   #-}
 
 import GHC.Generics
 
 -- | Friend modules
-import Attribute
+import Control.Algebra
+import Column.Attribute
+import Control.Effect.Query
+import SQL.Exp
 import Table
 
 data Person = Person
@@ -21,6 +23,10 @@ personTable = table "PersonDB"
   [ #age  :- Primary
   , #name :- Primary
   ]
+
+myQuery :: Has (Query Person) sig m => m ()
+myQuery = do
+  restrict (personTable .!. #age .==. literal 1)
 
 main :: IO ()
 main = print personTable

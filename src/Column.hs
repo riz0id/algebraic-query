@@ -32,7 +32,7 @@ import Lens.Micro
 import Lens.Micro.TH
 
 -- | Friend Modules
-import Attribute
+import Column.Attribute
 
 data Column = Column
   { _name       :: Text
@@ -49,12 +49,14 @@ data Cxt = Cxt
 makeLenses ''Cxt
 makeLenses ''Column
 
-
+-- | Reifies all of record @x@'s fields into columns with the same names.
+--
+-- | @since 1.0.0.0
 reifyColumns :: ∀ x. Relational x => Proxy x -> [ Column ]
 reifyColumns _ = join $ evalState cxt (gTblCols $ Proxy @(Rep x))
   where cxt = Cxt 0 Nothing
 
-  -- | The kind of constraint we impose on data types we'll be able to build a
+-- | The kind of constraint we impose on data types we'll be able to build a
 -- | database out of
 --
 -- | @since 1.0.0.0

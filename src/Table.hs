@@ -14,8 +14,8 @@ import Data.Text (Text)
 import Lens.Micro
 
 -- | Friend modules
-import Attribute
 import Column
+import Column.Attribute
 import SqlSelector
 
 -- | The frontend type for a SQL table. These are constructed via the 'table'

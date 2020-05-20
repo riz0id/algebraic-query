@@ -34,6 +34,7 @@ import GHC.Generics
 import GHC.OverloadedLabels
 import GHC.TypeLits
 
+
 -- | SqlSelector is a index decorated with the @x@(the record the index belongs
 -- | to) and @a@(the type of the field that indexing record @x@ will yield).
 --
@@ -61,7 +62,7 @@ field = SqlSelector $ case gSel (Proxy @n) (Proxy @ (Rep x)) 0 of
 -- | @since 1.0.0.0
 instance ( HasField n x
          , FieldType n x ~ a )
-   => IsLabel n (SqlSelector x a) where
+  => IsLabel n (SqlSelector x a) where
   fromLabel = field @n @x
 
 
