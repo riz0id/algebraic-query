@@ -1,6 +1,7 @@
 {-# LANGUAGE FlexibleContexts    #-}
 {-# LANGUAGE GADTs               #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TemplateHaskell     #-}
 {-# LANGUAGE TypeApplications    #-}
 {-# LANGUAGE UnicodeSyntax       #-}
 
@@ -12,30 +13,32 @@
 module Table
   ( -- * SQL Tables
     Table
+    -- ** Table Lenses
+  , tableName, tableColumns
     -- ** Table construction
   , table
   , SelConfig(..)
   ) where
 
 import Control.Carrier.State.Strict
-import Data.Functor.Identity
 import Data.HashMap.Strict as H hiding (map)
 import Data.Proxy
 import Data.Text (Text)
 import Lens.Micro
+import Lens.Micro.TH
 
 import Column
 import Column.Attribute
-import Selector
+import Table.Selector
 
 -- | The frontend type for a SQL table. These are constructed via the 'table'
 -- smart constructor.
 --
 -- @
---   data Person :: Person { age :: Int, name :: Text } deriving Generic
+-- data Person :: Person { age :: Int, name :: Text } deriving Generic
 --
---   myTable :: Table Person
---   myTable = table "PersonDB" [ age :- Primary ]
+-- myTable :: Table Person
+-- myTable = table "PersonDB" [ age :- Primary ]
 -- @
 --
 -- Will generate a table with the columns "age" of type Integer attributed as
@@ -43,9 +46,11 @@ import Selector
 --
 -- @since 1.0.0.0
 data Table a = Table
-  { tableName    :: Text
-  , tableColumns :: [Column]
+  { _tableName    :: Text
+  , _tableColumns :: [Column]
   } deriving Show
+
+$(makeLenses ''Table)
 
 -- | Syntactic construct used for specifying further properties a table should
 -- hold when being generated. See 'table' for a use case.
@@ -62,9 +67,9 @@ data SelConfig t where
 -- @since 1.0.0.0
 table :: ∀ a. Relational a => Text -> [SelConfig a]  -> Table a
 table name configs = Table
-  { tableName    = name
-  , tableColumns =
-    let buckets = runIdentity $ execState empty (bucketConfigs configs)
+  { _tableName    = name
+  , _tableColumns =
+    let buckets = run $ execState empty (bucketConfigs configs)
         columns = reifyColumns $ Proxy @a
         go (ix, c) = c & attributes <>~ (maybe [] id $ H.lookup ix buckets)
     in map go $ zip [(0 :: Int)..] columns

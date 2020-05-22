@@ -44,15 +44,17 @@ library
   hs-source-dirs: src
 
   exposed-modules:
-      Column
+      Backend
+    , Backend.Internal
+    , Column
     , Column.Attribute
     , Control.Carrier.Query
     , Control.Effect.Query
     , Control.Effect.Query.Labelled
-    , Selector
     , SQL
     , SQL.Exp
     , Table
+    , Table.Selector
 
   other-modules:
       Control.Effect.Query.Internal
@@ -60,12 +62,13 @@ library
 
   build-depends:
       base          >= 4.9 && < 4.15
-    , unordered-containers
+    , dlist
     , fused-effects
     , fused-effects-lens
     , microlens
     , microlens-th
     , text
+    , unordered-containers
 
 test-suite test
   import:         common
@@ -76,6 +79,7 @@ test-suite test
   build-depends:
     , algebraic-query
     , base
+    , dlist
     , fused-effects
     , generic-lens
     , text

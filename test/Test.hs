@@ -12,6 +12,9 @@ import GHC.TypeLits
 import Column.Attribute
 import Control.Effect.Labelled
 import Control.Effect.Query.Labelled
+
+import Backend
+import Backend.Internal
 import SQL
 import SQL.Exp
 import Table
@@ -46,4 +49,6 @@ myQuery = do
   restrict @"2" (persons2 .!. #age .<. literal 25)
 
 main :: IO ()
-main = print personTable
+main = do
+  print $ compileTable personTable (TableCompileC False)
+  print personTable

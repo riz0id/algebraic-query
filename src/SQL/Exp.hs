@@ -18,12 +18,12 @@ module SQL.Exp
   , (.==.), (.<.), (.<=.), (.>.), (.>=.)
 
     -- * Re-exports
-  , Exp
+  , Exp(..), Literal(..), BinOp(..)
   )where
 
-import Selector
 import SQL.Exp.AST
 import Table
+import Table.Selector
 
 -- | Syntax for a selecting a field from a table.
 --

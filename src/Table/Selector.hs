@@ -26,7 +26,7 @@
 --   interpreted as TypeLits.Symbol referring to a record field, and 'x' the
 --   the recor that field is in.
 
-module Selector
+module Table.Selector
   ( Selector (..), field
     -- *
   , HasField, FieldType, GFieldType, GRSel
@@ -49,7 +49,6 @@ import GHC.TypeLits
 newtype Selector x a = Selector { sqlSelectorIx :: Int }
   deriving Show
 
-
 -- | ∀ (n :: Symbol) (x :: Type), we can produce a index. This index corresponds
 -- to the one of the columns that inhabit a table @Table n@ type. Because we
 --
@@ -61,7 +60,6 @@ field = Selector $ case gSel (Proxy @n) (Proxy @ (Rep x)) 0 of
   -- FIXME: This is the condition where the Symbol type argument passed in does
   --   not refer to one of the selectors fields.
 
-
 -- | Orphan instance that binding a column index from a given field.
 --
 -- @since 1.0.0.0
@@ -69,7 +67,6 @@ instance ( HasField n x
          , FieldType n x ~ a )
   => IsLabel n (Selector x a) where
   fromLabel = field @n @x
-
 
 -- | Generically nab the of a record selector given a Symbol with the same name.
 -- FIXME: Note that this fails if the Symbol does not refer to an actualy
@@ -93,7 +90,6 @@ type family GFieldType (a :: Type -> Type) (n :: Symbol) :: Type where
   GFieldType (M1 S ('MetaSel ('Just _) _ _ _) f) _ = GetFieldType f
   GFieldType (M1 _ _ a) n = GFieldType a n
   GFieldType (a :*: _)  n = GFieldType a n
-
 
 -- | Given a Symbol referring to a record selector, this class provides the
 -- functionality to get a index of that selectors position, almost as if the
