@@ -7,7 +7,7 @@ module Control.Effect.Query.Internal
 import Control.Algebra
 import GHC.Generics
 
-import SQL
+import Database.Algebraic.SQL
 
 -- | @since 1.0.0.0
 data Query tbl m k

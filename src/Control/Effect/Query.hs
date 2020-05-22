@@ -12,9 +12,9 @@ import Control.Algebra
 import Lens.Micro
 
 import Control.Effect.Query.Internal
-import SQL
-import SQL.Exp
-import Table
+import Database.Algebraic.SQL
+import Database.Algebraic.SQL.Exp
+import Database.Algebraic.Table
 
 -- | Extract a table from a given Query context.
 --

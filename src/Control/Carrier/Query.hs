@@ -16,7 +16,7 @@ module Control.Carrier.Query
 import Control.Algebra
 
 import Control.Effect.Query
-import SQL
+import Database.Algebraic.SQL
 
 
 -- | @since 1.0.0.0

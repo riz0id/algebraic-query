@@ -16,8 +16,8 @@ import Control.Effect.Labelled
 
 import           Control.Effect.Query.Internal
 import qualified Control.Effect.Query          as Q
-import           SQL.Exp
-import           Table
+import           Database.Algebraic.SQL.Exp
+import           Database.Algebraic.Table
 
 
 -- | @since 1.0.0.0

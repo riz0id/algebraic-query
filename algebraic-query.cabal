@@ -44,24 +44,28 @@ library
   hs-source-dirs: src
 
   exposed-modules:
-      Backend
-    , Backend.Internal
-    , Column
-    , Column.Attribute
-    , Control.Carrier.Query
+      Control.Carrier.Query
     , Control.Effect.Query
     , Control.Effect.Query.Labelled
-    , SQL
-    , SQL.Exp
-    , Table
-    , Table.Selector
+    , Database.Algebraic.Backend
+    , Database.Algebraic.Backend.Internal
+    , Database.Algebraic.Column
+    , Database.Algebraic.Column.Generic
+    , Database.Algebraic.Column.Type
+    , Database.Algebraic.SQL
+    , Database.Algebraic.SQL.Exp
+    , Database.Algebraic.Table
+    , Database.Algebraic.Table.Selector
+    , Database.Algebraic.Table.Type
 
   other-modules:
       Control.Effect.Query.Internal
-    , SQL.Exp.AST
+    , Database.Algebraic.Column.Attribute
+    , Database.Algebraic.SQL.Exp.AST
 
   build-depends:
       base          >= 4.9 && < 4.15
+    , containers
     , dlist
     , fused-effects
     , fused-effects-lens
@@ -76,10 +80,17 @@ test-suite test
   hs-source-dirs: test
   main-is:        Test.hs
 
+  other-modules:
+      Test.Table
+
   build-depends:
     , algebraic-query
     , base
     , dlist
+    , microlens
+    , tasty
+    , tasty-hedgehog
+    , tasty-hunit
     , fused-effects
     , generic-lens
     , text
