@@ -4,7 +4,7 @@
 {-# LANGUAGE TypeApplications  #-}
 
 module Database.Algebraic.Backend.Internal
-  ( tableCompiler
+  ( tableCompiler, insertCompiler
   , TableCompileC(..)
   , DString
   ) where
@@ -61,3 +61,10 @@ tableCompiler table = do
 
 columnCompiler :: Column -> DString
 columnCompiler col = fromList . T.unpack $ col^.name
+
+insertCompiler :: Has (Writer DString) sig m
+               => Table a -> [a] -> m ()
+insertCompiler table values = do
+  tell @(DString) "INSERT INTO "
+  tell @(DString) . fromList . T.unpack $ table^.tableName
+  tell @(DString) " ("

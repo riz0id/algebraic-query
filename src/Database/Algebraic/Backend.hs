@@ -3,6 +3,7 @@
 module Database.Algebraic.Backend
   ( -- * Compliation
     compileTable
+  , compileInsert
   ) where
 
 import Control.Carrier.Writer.Strict
@@ -19,3 +20,10 @@ compileTable table config
   . runReader config
   . (execWriter @DString)
   $ tableCompiler table
+
+compileInsert :: Table a -> [a] -> String
+compileInsert table values
+  = toList
+  . run
+  . execWriter
+  $ insertCompiler table values

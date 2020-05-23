@@ -47,8 +47,10 @@ library
       Control.Carrier.Query
     , Control.Effect.Query
     , Control.Effect.Query.Labelled
+    , Database.Algebraic
     , Database.Algebraic.Backend
     , Database.Algebraic.Backend.Internal
+    , Database.Algebraic.Backend.SQLite
     , Database.Algebraic.Column
     , Database.Algebraic.Column.Generic
     , Database.Algebraic.Column.Type
@@ -66,8 +68,11 @@ library
   build-depends:
       base          >= 4.9 && < 4.15
     , containers
+    , directory
+    , direct-sqlite
     , dlist
     , fused-effects
+    , fused-effects-exceptions
     , fused-effects-lens
     , microlens
     , microlens-th
