@@ -22,13 +22,9 @@
 --
 -- @since 1.0.0.0
 
--- NOTE: Anywhere in this file where a type variable is named 'n' should be
---   interpreted as TypeLits.Symbol referring to a record field, and 'x' the
---   the recor that field is in.
-
 module Database.Algebraic.Table.Selector
   ( Selector (..), field
-    -- *
+    -- * Lalala
   , HasField, FieldType, GFieldType, GRSel
 
   ) where
@@ -37,8 +33,8 @@ import Data.Kind
 import Data.Proxy
 import GHC.Generics         hiding (Selector)
 import GHC.OverloadedLabels
+import GHC.Records
 import GHC.TypeLits
-
 
 -- | SqlSelector is a index decorated with the @x@(the record the index belongs
 -- to) and @a@(the type of the field that indexing record @x@ will yield).
@@ -53,24 +49,18 @@ newtype Selector x a = Selector { sqlSelectorIx :: Int }
 -- to the one of the columns that inhabit a table @Table n@ type. Because we
 --
 -- @since 1.0.0.0
-field :: ∀ n x. (HasField n x) => Selector x (FieldType n x)
+field :: ∀ n x a. (HasField n x a, GRSel n (Rep x)) => Selector x a
 field = Selector $ case gSel (Proxy @n) (Proxy @ (Rep x)) 0 of
   Left  n -> n
-  Right _ -> error "at 'field' - unreachable case breached"
-  -- FIXME: This is the condition where the Symbol type argument passed in does
-  --   not refer to one of the selectors fields.
+  Right _ -> error "This is a bug, if you have reached this point please file a issue "
 
 -- | Orphan instance that binding a column index from a given field.
 --
 -- @since 1.0.0.0
-instance ( HasField n x
-         , FieldType n x ~ a )
-  => IsLabel n (Selector x a) where
+instance (HasField n x a, GRSel n (Rep x)) => IsLabel n (Selector x a) where
   fromLabel = field @n @x
 
 -- | Generically nab the of a record selector given a Symbol with the same name.
--- FIXME: Note that this fails if the Symbol does not refer to an actualy
--- field in the record.
 --
 -- @since 1.0.0.0
 type FieldType n x = GFieldType (Rep x) n
@@ -90,18 +80,6 @@ type family GFieldType (a :: Type -> Type) (n :: Symbol) :: Type where
   GFieldType (M1 S ('MetaSel ('Just _) _ _ _) f) _ = GetFieldType f
   GFieldType (M1 _ _ a) n = GFieldType a n
   GFieldType (a :*: _)  n = GFieldType a n
-
--- | Given a Symbol referring to a record selector, this class provides the
--- functionality to get a index of that selectors position, almost as if the
--- record was an array.
--- FIXME:  Note that this fails if the Symbol does not refer to an actualy
---   field in the record.
---
--- @since 1.0.0.0
-class GRSel n (Rep x) => HasField (n :: Symbol) x
-
--- | @since 1.0.0.0
-instance GRSel n (Rep x) => HasField (n :: Symbol) x
 
 -- | Generically get the index of a record's field.
 --
