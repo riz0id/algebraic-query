@@ -1,5 +1,6 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE ConstraintKinds     #-}
+{-# LANGUAGE DefaultSignatures   #-}
 {-# LANGUAGE FlexibleInstances   #-}
 {-# LANGUAGE FlexibleContexts    #-}
 {-# LANGUAGE OverloadedStrings   #-}
@@ -7,6 +8,7 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TemplateHaskell     #-}
 {-# LANGUAGE TypeApplications    #-}
+{-# LANGUAGE TypeFamilies        #-}
 {-# LANGUAGE TypeOperators       #-}
 {-# LANGUAGE UnicodeSyntax       #-}
 
@@ -27,12 +29,11 @@ import Data.Proxy
 import Data.Set as Set
 import Data.Text
 import Data.Typeable
+import Database.Algebraic.Column.Attribute
+import Database.Algebraic.Column.Type
 import GHC.Generics
 import Lens.Micro
 import Lens.Micro.TH
-
-import Database.Algebraic.Column.Attribute
-import Database.Algebraic.Column.Type
 
 -- Carrying indicies for alternative column names.
 data Cxt = Cxt
@@ -49,6 +50,25 @@ reifyColumns :: ∀ x. Relational x => Proxy x -> [ Column ]
 reifyColumns _ = run $ evalState cxt (gTblCols $ Proxy @(Rep x))
   where cxt = Cxt 0 Nothing
 
+-- | Converts a value to a "String" for use in SQL syntax.
+--
+-- @since 0.1.0.0
+class SqlShow a where
+  sqlShow :: a -> String
+
+  default sqlShow :: Show a => a -> String
+  sqlShow = show
+
+instance SqlShow Double
+instance SqlShow Int
+
+instance SqlShow String where
+  sqlShow x = "'" ++ x ++ "'"
+
+instance SqlShow a => SqlShow (Maybe a) where
+  sqlShow (Just x) = sqlShow x
+  sqlShow Nothing  = "NULL"
+
 -- | The kind of constraint we impose on data types we'll be able to build a
 -- database out of.
 --
@@ -60,23 +80,41 @@ type Relational a =
 
 -- | @since 1.0.0.0
 class GRelation rep where
-  gTblCols :: forall sig m. Has (State Cxt) sig m
-           => Proxy rep -> m [ Column ]
+  -- | gFieldValues extracts all the values in a term level record and gives
+  -- them back as a heterogeneous list.
+  --
+  -- @since 0.1.0.0
+  gFieldValues :: rep a -> [ String ]
+
+  -- | gTblCols traverses the generic representation of a record @rep@ to
+  -- generate columns where the column name is the name of the field
+  -- selector.
+  --
+  -- @since 0.1.0.0
+  gTblCols :: forall sig m. Has (State Cxt) sig m => Proxy rep -> m [ Column ]
 
 instance GRelation a => GRelation (C1 c a) where
+  gFieldValues (M1 x) = gFieldValues x
+
   gTblCols _ = gTblCols (Proxy @a)
 
 instance GRelation a => GRelation (D1 c a) where
+  gFieldValues (M1 x) = gFieldValues x
+
   gTblCols _ = gTblCols (Proxy :: Proxy a)
 
 instance (Selector c, GRelation a) => GRelation (S1 c a) where
+  gFieldValues (M1 x) = gFieldValues x
+
   gTblCols _ = do
     cxtName .= case pack (selName (undefined :: S1 c a b)) of
       "" -> Nothing
       n  -> Just n
     gTblCols (Proxy @a)
 
-instance Typeable a => GRelation (K1 i a) where
+instance (SqlShow a, Typeable a) => GRelation (K1 i a) where
+  gFieldValues (K1 x) = return $! sqlShow x
+
   gTblCols _ = do
     st  <- get @ Cxt
     idx += 1
@@ -92,6 +130,8 @@ instance Typeable a => GRelation (K1 i a) where
           proxyTyCon = typeRepTyCon . typeRep $ Proxy @a
 
 instance (GRelation a, GRelation b) => GRelation (a :*: b) where
+  gFieldValues (a :*: b) = (gFieldValues a) ++ (gFieldValues b)
+
   gTblCols _ =
     let as = gTblCols (Proxy :: Proxy a)
         bs = gTblCols (Proxy :: Proxy b)

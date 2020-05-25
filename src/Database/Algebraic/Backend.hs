@@ -1,29 +1,34 @@
-{-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TypeApplications    #-}
 
-module Database.Algebraic.Backend
-  ( -- * Compliation
-    compileTable
-  , compileInsert
-  ) where
+module Database.Algebraic.Backend where
 
-import Control.Carrier.Writer.Strict
-import Control.Carrier.Reader
-import Data.DList
+import Control.Effect.Lift
+import Control.Effect.Exception
+import Data.Text
+import Database.SQLite3
+import System.Directory
 
-import Database.Algebraic.Backend.Internal
-import Database.Algebraic.Table
+data Connection = Connection
+  { connection :: Database
+  , identifier :: Text
+  , statements :: [String]
+  }
 
-compileTable :: Table tbl -> TableCompileC -> String
-compileTable table config
-  = toList
-  . run
-  . runReader config
-  . (execWriter @DString)
-  $ tableCompiler table
+openSQLite :: forall e sig m. (Exception e, Has (Lift IO) sig m)
+           => FilePath -> m Connection
+openSQLite fp = do
+  db <- try @e . sendIO . open . pack $ fp
+  case db of
+    Left  e   -> throwIO e
+    Right db' -> do
+      absFile <- sendIO (pack <$> makeAbsolute fp)
+      return (Connection db' absFile [])
 
-compileInsert :: Table a -> [a] -> String
-compileInsert table values
-  = toList
-  . run
-  . execWriter
-  $ insertCompiler table values
+prep :: forall e. Exception e => Database -> Text -> IO Statement
+prep db qry = do
+  res <- try @e (prepare db qry)
+  case res of
+    Left  e   -> throwIO e
+    Right res -> return res

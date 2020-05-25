@@ -25,12 +25,13 @@ import Data.HashMap.Strict as H hiding (map)
 import Data.Proxy
 import Data.Set as Set
 import Data.Text (Text)
-import Lens.Micro
-import Prelude as P
-
-import Database.Algebraic.Column
+import Database.Algebraic.Column.Attribute
+import Database.Algebraic.Column.Type
+import Database.Algebraic.Column.Generic
 import Database.Algebraic.Table.Selector
 import Database.Algebraic.Table.Type
+import Lens.Micro
+import Prelude as P
 
 
 -- | Syntactic construct used for specifying further properties a table should

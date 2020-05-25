@@ -10,7 +10,7 @@ module Database.Algebraic.Table.Type
 import Data.Text
 import Lens.Micro.TH
 
-import Database.Algebraic.Column
+import Database.Algebraic.Column.Type
 
 -- | The frontend type for a SQL table. These are constructed via the 'table'
 -- smart constructor.
