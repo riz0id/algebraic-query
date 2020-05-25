@@ -8,7 +8,7 @@ license:      BSD-3-Clause
 license-file: LICENSE
 author:       riz0id
 maintainer:   jacob@z-tech.org
-copyright:    Copyright (C) 2012-2016 Edward A. Kmett
+copyright:    Copyright (C) 2012-2016 Jacob D. Leach
 category:     Control, Database, SQL
 build-type:   Simple
 
@@ -49,11 +49,13 @@ library
     , Control.Effect.Query.Labelled
     , Database.Algebraic
     , Database.Algebraic.Backend
-    , Database.Algebraic.Backend.Internal
-    , Database.Algebraic.Backend.SQLite
     , Database.Algebraic.Column
     , Database.Algebraic.Column.Generic
     , Database.Algebraic.Column.Type
+    , Database.Algebraic.Compiler.Combinators
+    , Database.Algebraic.Compiler.Create
+    , Database.Algebraic.Compiler.Insert
+    , Database.Algebraic.Compiler.Type
     , Database.Algebraic.SQL
     , Database.Algebraic.SQL.Exp
     , Database.Algebraic.Table

@@ -4,7 +4,7 @@ module Database.Algebraic.SQL.Exp.AST
   ( Exp(..), Literal(..), BinOp(..)
   ) where
 
-import Database.Algebraic.Table
+import Database.Algebraic.Table.Type
 import Database.Algebraic.Table.Selector
 
 -- | Expressions used in SQL queries.
@@ -20,11 +20,12 @@ data Exp tbl a where
   -- | Selecting a field from a table for use in an expression.
   Sel   :: Table tbl -> Selector tbl a -> Exp tbl a
 
--- | Typed literal wrappers in SQL expressions
+-- | Typed literal wrappers in SQL expressions. @tbl@ is a type level witness of
+-- the table this value is scoped over.
 --
 -- @since 1.0.0.0
 newtype Literal tbl a = Literal a
-
+  deriving Show
 
 -- | Supported binary operations.
 --

@@ -5,6 +5,7 @@ module Database.Algebraic.Column
   , attributes
   , reifyColumns
   , Relational
+  , GRelation(..)
     -- * Attributes
   , Attribute
   , primary

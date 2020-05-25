@@ -22,7 +22,7 @@ module Database.Algebraic.SQL.Exp
   )where
 
 import Database.Algebraic.SQL.Exp.AST
-import Database.Algebraic.Table
+import Database.Algebraic.Table.Type
 import Database.Algebraic.Table.Selector
 
 -- | Syntax for a selecting a field from a table.

@@ -1,6 +1,8 @@
 {-# LANGUAGE TemplateHaskell #-}
 
-module Database.Algebraic.Column.Type where
+module Database.Algebraic.Column.Type
+  ( Column(..), name, attributes
+  ) where
 
 import Data.Set
 import Data.Text
